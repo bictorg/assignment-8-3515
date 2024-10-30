@@ -6,7 +6,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/control"
-        android:name="com.example.webbrowser.ControlFragment"
+        android:name="edu.temple.browsr.ControlFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
