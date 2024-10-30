@@ -12,7 +12,7 @@ class ControlFragment : Fragment() {
     private lateinit var urlEditText: EditText
     private lateinit var goButton: ImageView
     private lateinit var backButton: ImageView
-    private lateinit var forwardButton: ImageView
+    private lateinit var nextButton: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,7 +28,7 @@ class ControlFragment : Fragment() {
         urlEditText = view.findViewById(R.id.urlEditText)
         goButton = view.findViewById(R.id.goButton)
         backButton = view.findViewById(R.id.backButton)
-        forwardButton = view.findViewById(R.id.forwardButton)
+        nextButton = view.findViewById(R.id.nextButton)
 
         setupClickListeners()
     }
@@ -43,7 +43,7 @@ class ControlFragment : Fragment() {
             (activity as? MainActivity)?.goBack()
         }
 
-        forwardButton.setOnClickListener {
+        nextButton.setOnClickListener {
             (activity as? MainActivity)?.goForward()
         }
     }
