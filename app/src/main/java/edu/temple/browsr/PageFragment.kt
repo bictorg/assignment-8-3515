@@ -1,3 +1,15 @@
+package edu.temple.browsr
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.fragment.app.Fragment
+import java.net.URLEncoder
+
 class PageFragment : Fragment() {
     private var webView: WebView? = null
 
