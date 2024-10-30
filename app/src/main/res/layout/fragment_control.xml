@@ -11,8 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:hint="Enter URL"
-        android:inputType="textUri"
-        android:padding="8dp" />
+        android:inputType="textUri" />
 
     <ImageView
         android:id="@+id/goButton"
@@ -29,10 +28,10 @@
         android:src="@drawable/ic_back" />
 
     <ImageView
-        android:id="@+id/forwardButton"
+        android:id="@+id/nextButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:padding="8dp"
-        android:src="@drawable/ic_forward" />
+        android:src="@drawable/ic_next" />
 
 </LinearLayout> 
