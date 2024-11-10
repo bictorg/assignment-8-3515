@@ -26,7 +26,15 @@ class PageFragment : Fragment() {
         webView = view.findViewById(R.id.webView)
         webView?.apply {
             settings.javaScriptEnabled = true
-            webViewClient = CustomWebViewClient()
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    url?.let { 
+                        (activity as? MainActivity)?.updateUrl(it)
+                        (activity as? MainActivity)?.updateStoredUrl(it)
+                    }
+                }
+            }
         }
 
         savedInstanceState?.let {
@@ -59,19 +67,5 @@ class PageFragment : Fragment() {
 
     fun getCurrentUrl(): String? {
         return webView?.url
-    }
-
-    inner class CustomWebViewClient : WebViewClient() {
-        override fun shouldOverrideUrlLoading(
-            view: WebView?,
-            request: WebResourceRequest?
-        ): Boolean {
-            return false
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            super.onPageFinished(view, url)
-            url?.let { (activity as? MainActivity)?.updateUrl(it) }
-        }
     }
 } 
