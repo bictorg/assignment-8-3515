@@ -34,4 +34,11 @@
         android:padding="8dp"
         android:src="@drawable/ic_next" />
 
+    <ImageView
+        android:id="@+id/newTabButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_add" />
+
 </LinearLayout> 
