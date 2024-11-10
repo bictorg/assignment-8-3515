@@ -10,9 +10,6 @@ import androidx.fragment.app.Fragment
 
 class ControlFragment : Fragment() {
     private lateinit var urlEditText: EditText
-    private lateinit var goButton: ImageView
-    private lateinit var backButton: ImageView
-    private lateinit var nextButton: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,25 +23,21 @@ class ControlFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         urlEditText = view.findViewById(R.id.urlEditText)
-        goButton = view.findViewById(R.id.goButton)
-        backButton = view.findViewById(R.id.backButton)
-        nextButton = view.findViewById(R.id.nextButton)
 
-        setupClickListeners()
-    }
-
-    private fun setupClickListeners() {
-        goButton.setOnClickListener {
-            val url = urlEditText.text.toString()
-            (activity as? MainActivity)?.loadUrl(url)
+        view.findViewById<ImageView>(R.id.goButton).setOnClickListener {
+            (activity as? BrowserInterface)?.loadUrl(urlEditText.text.toString())
+        }
+        
+        view.findViewById<ImageView>(R.id.backButton).setOnClickListener {
+            (activity as? BrowserInterface)?.goBack()
+        }
+        
+        view.findViewById<ImageView>(R.id.nextButton).setOnClickListener {
+            (activity as? BrowserInterface)?.goForward()
         }
 
-        backButton.setOnClickListener {
-            (activity as? MainActivity)?.goBack()
-        }
-
-        nextButton.setOnClickListener {
-            (activity as? MainActivity)?.goForward()
+        view.findViewById<ImageView>(R.id.newTabButton).setOnClickListener {
+            (activity as? BrowserInterface)?.addNewTab()
         }
     }
 
