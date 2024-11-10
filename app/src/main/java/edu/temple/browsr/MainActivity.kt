@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
     private lateinit var viewPager: ViewPager2
     private lateinit var pagerAdapter: BrowserPagerAdapter
     private var currentPosition = 0
+    private var tabUrls = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,21 +21,40 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
         pagerAdapter = BrowserPagerAdapter(this)
         viewPager.adapter = pagerAdapter
 
-        // Restore state from SharedPreferences or create initial tab
+        // Restore state from SharedPreferences
         val prefs = getSharedPreferences("BrowserState", Context.MODE_PRIVATE)
-        val tabCount = prefs.getInt("TAB_COUNT", 0)
+        val tabCount = prefs.getInt("TAB_COUNT", 1) // Default to 1 tab
         currentPosition = prefs.getInt("CURRENT_POSITION", 0)
-
-        if (tabCount > 0) {
-            // Restore tabs
-            repeat(tabCount) {
-                pagerAdapter.addTab()
+        
+        try {
+            // Restore URLs
+            tabUrls.clear()
+            for (i in 0 until tabCount) {
+                val url = prefs.getString("TAB_URL_$i", "about:blank") ?: "about:blank"
+                tabUrls.add(url)
             }
-            // Restore position
-            viewPager.setCurrentItem(currentPosition, false)
-        } else {
-            // Add initial tab
-            pagerAdapter.addTab()
+
+            // Always ensure at least one tab exists
+            if (tabUrls.isEmpty()) {
+                tabUrls.add("about:blank")
+            }
+
+            // Create tabs
+            tabUrls.forEach { url ->
+                pagerAdapter.addTab(url)
+            }
+
+            // Safely set current position
+            viewPager.post {
+                val safePosition = currentPosition.coerceIn(0, pagerAdapter.itemCount - 1)
+                viewPager.setCurrentItem(safePosition, false)
+            }
+        } catch (e: Exception) {
+            // If anything goes wrong, start with a single blank tab
+            tabUrls.clear()
+            tabUrls.add("about:blank")
+            pagerAdapter.addTab("about:blank")
+            currentPosition = 0
         }
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -47,31 +67,47 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
 
     override fun onStop() {
         super.onStop()
-        // Save state when app is closed
-        getSharedPreferences("BrowserState", Context.MODE_PRIVATE)
-            .edit()
-            .putInt("TAB_COUNT", pagerAdapter.itemCount)
-            .putInt("CURRENT_POSITION", currentPosition)
-            .apply()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("TAB_COUNT", pagerAdapter.itemCount)
-        outState.putInt("CURRENT_POSITION", currentPosition)
+        try {
+            // Save state and URLs when app is closed
+            val prefs = getSharedPreferences("BrowserState", Context.MODE_PRIVATE).edit()
+            prefs.putInt("TAB_COUNT", pagerAdapter.itemCount)
+            prefs.putInt("CURRENT_POSITION", currentPosition)
+            
+            // Save URL for each tab
+            for (i in 0 until pagerAdapter.itemCount) {
+                val url = tabUrls.getOrNull(i) ?: "about:blank"
+                prefs.putString("TAB_URL_$i", url)
+            }
+            prefs.apply()
+        } catch (e: Exception) {
+            // If saving fails, clear preferences
+            getSharedPreferences("BrowserState", Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
+        }
     }
 
     override fun addNewTab() {
-        pagerAdapter.addTab()
+        tabUrls.add("about:blank")
+        pagerAdapter.addTab("about:blank")
         viewPager.currentItem = pagerAdapter.itemCount - 1
     }
 
     override fun loadUrl(url: String) {
         getCurrentTab()?.loadUrl(url)
+        // Update URL in our list
+        if (currentPosition < tabUrls.size) {
+            tabUrls[currentPosition] = url
+        }
     }
 
     override fun updateUrl(url: String) {
         getCurrentTab()?.updateUrl(url)
+        // Update URL in our list
+        if (currentPosition < tabUrls.size) {
+            tabUrls[currentPosition] = url
+        }
     }
 
     override fun goBack() {
@@ -83,16 +119,20 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
     }
 
     private fun getCurrentTab(): TabFragment? {
-        return supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-            as? TabFragment
+        return try {
+            supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                as? TabFragment
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
 class BrowserPagerAdapter(activity: MainActivity) : FragmentStateAdapter(activity) {
     private val tabs = mutableListOf<TabFragment>()
 
-    fun addTab() {
-        tabs.add(TabFragment())
+    fun addTab(url: String) {
+        tabs.add(TabFragment.newInstance(url))
         notifyItemInserted(tabs.size - 1)
     }
 

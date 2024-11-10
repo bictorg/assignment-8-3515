@@ -9,6 +9,24 @@ import androidx.fragment.app.Fragment
 class TabFragment : Fragment() {
     private var pageFragment: PageFragment? = null
     private var controlFragment: ControlFragment? = null
+    private var initialUrl: String = "about:blank"
+
+    companion object {
+        private const val ARG_URL = "url"
+        
+        fun newInstance(url: String): TabFragment {
+            return TabFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_URL, url)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initialUrl = arguments?.getString(ARG_URL) ?: "about:blank"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,6 +47,16 @@ class TabFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.control)?.let {
             controlFragment = it as ControlFragment
         }
+
+        // Load initial URL if not blank
+        if (initialUrl != "about:blank") {
+            pageFragment?.loadUrl(initialUrl)
+            controlFragment?.updateUrl(initialUrl)
+        }
+    }
+
+    fun getCurrentUrl(): String {
+        return pageFragment?.getCurrentUrl() ?: "about:blank"
     }
 
     fun loadUrl(url: String) {

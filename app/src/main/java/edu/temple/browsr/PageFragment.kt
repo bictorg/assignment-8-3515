@@ -57,6 +57,10 @@ class PageFragment : Fragment() {
         }
     }
 
+    fun getCurrentUrl(): String {
+        return webView?.url ?: "about:blank"
+    }
+
     inner class CustomWebViewClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(
             view: WebView?,
