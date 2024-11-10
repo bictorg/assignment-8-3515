@@ -57,8 +57,8 @@ class PageFragment : Fragment() {
         }
     }
 
-    fun getCurrentUrl(): String {
-        return webView?.url ?: "about:blank"
+    fun getCurrentUrl(): String? {
+        return webView?.url
     }
 
     inner class CustomWebViewClient : WebViewClient() {

@@ -55,8 +55,8 @@ class TabFragment : Fragment() {
         }
     }
 
-    fun getCurrentUrl(): String {
-        return pageFragment?.getCurrentUrl() ?: "about:blank"
+    fun getCurrentUrl(): String? {
+        return pageFragment?.getCurrentUrl()
     }
 
     fun loadUrl(url: String) {
