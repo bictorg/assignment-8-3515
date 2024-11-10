@@ -9,6 +9,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 class MainActivity : AppCompatActivity(), BrowserInterface {
     private lateinit var viewPager: ViewPager2
     private lateinit var pagerAdapter: BrowserPagerAdapter
+    private var currentPosition = 0  // Track current position
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,10 +19,36 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
         pagerAdapter = BrowserPagerAdapter(this)
         viewPager.adapter = pagerAdapter
 
-        if (savedInstanceState == null) {
+        // Restore state or create initial tab
+        if (savedInstanceState != null) {
+            val tabCount = savedInstanceState.getInt("TAB_COUNT", 0)
+            currentPosition = savedInstanceState.getInt("CURRENT_POSITION", 0)
+            
+            // Restore tabs
+            repeat(tabCount) {
+                pagerAdapter.addTab()
+            }
+            
+            // Restore position
+            viewPager.setCurrentItem(currentPosition, false)
+        } else {
             // Add initial tab
             pagerAdapter.addTab()
         }
+
+        // Track position changes
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                currentPosition = position
+            }
+        })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("TAB_COUNT", pagerAdapter.itemCount)
+        outState.putInt("CURRENT_POSITION", currentPosition)
     }
 
     override fun addNewTab() {
