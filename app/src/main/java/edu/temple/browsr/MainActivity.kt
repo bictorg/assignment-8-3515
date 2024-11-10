@@ -5,11 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import android.content.Context
 
 class MainActivity : AppCompatActivity(), BrowserInterface {
     private lateinit var viewPager: ViewPager2
     private lateinit var pagerAdapter: BrowserPagerAdapter
-    private var currentPosition = 0  // Track current position
+    private var currentPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,16 +20,16 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
         pagerAdapter = BrowserPagerAdapter(this)
         viewPager.adapter = pagerAdapter
 
-        // Restore state or create initial tab
-        if (savedInstanceState != null) {
-            val tabCount = savedInstanceState.getInt("TAB_COUNT", 0)
-            currentPosition = savedInstanceState.getInt("CURRENT_POSITION", 0)
-            
+        // Restore state from SharedPreferences or create initial tab
+        val prefs = getSharedPreferences("BrowserState", Context.MODE_PRIVATE)
+        val tabCount = prefs.getInt("TAB_COUNT", 0)
+        currentPosition = prefs.getInt("CURRENT_POSITION", 0)
+
+        if (tabCount > 0) {
             // Restore tabs
             repeat(tabCount) {
                 pagerAdapter.addTab()
             }
-            
             // Restore position
             viewPager.setCurrentItem(currentPosition, false)
         } else {
@@ -36,13 +37,22 @@ class MainActivity : AppCompatActivity(), BrowserInterface {
             pagerAdapter.addTab()
         }
 
-        // Track position changes
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 currentPosition = position
             }
         })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Save state when app is closed
+        getSharedPreferences("BrowserState", Context.MODE_PRIVATE)
+            .edit()
+            .putInt("TAB_COUNT", pagerAdapter.itemCount)
+            .putInt("CURRENT_POSITION", currentPosition)
+            .apply()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
